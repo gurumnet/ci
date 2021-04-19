@@ -171,7 +171,7 @@ def main(argv=None):
     }
 
     jenkins_kwargs = {}
-    jenkins_kwargs['context_lines'] = args.context_lines
+    # jenkins_kwargs['context_lines'] = args.context_lines
     if not args.commit:
         jenkins_kwargs['dry_run'] = True
     pattern_select_jobs_regexp = ''
