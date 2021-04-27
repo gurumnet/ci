@@ -24,7 +24,7 @@
     </org.jenkinsci.plugins.requeuejob.RequeueJobProperty>
     <hudson.model.ParametersDefinitionProperty>
       <parameterDefinitions>
-@(SNIPPET(
+@(SNIPPET
     'property_parameter-definition_common',
     ci_scripts_default_branch=ci_scripts_default_branch,
     default_repos_url=default_repos_url,
@@ -117,6 +117,7 @@ repos_url: ${build.buildVariableResolver.resolve('CI_ROS2_REPOS_URL')}, <br/>
 use_connextdds: ${build.buildVariableResolver.resolve('CI_USE_CONNEXTDDS')}, <br/>
 use_connext_debs: ${build.buildVariableResolver.resolve('CI_USE_CONNEXT_DEBS')}, <br/>
 use_cyclonedds: ${build.buildVariableResolver.resolve('CI_USE_CYCLONEDDS')}, <br/>
+use_gurumdds: ${build.buildVariableResolver.resolve('CI_USE_GURUMDDS')}, <br/>
 use_fastrtps_static: ${build.buildVariableResolver.resolve('CI_USE_FASTRTPS_STATIC')}, <br/>
 use_fastrtps_dynamic: ${build.buildVariableResolver.resolve('CI_USE_FASTRTPS_DYNAMIC')}, <br/>
 use_opensplice: ${build.buildVariableResolver.resolve('CI_USE_OPENSPLICE')}, <br/>
@@ -160,6 +161,9 @@ else
 fi
 if [ "$CI_USE_CYCLONEDDS" = "false" ]; then
   export CI_ARGS="$CI_ARGS rmw_cyclonedds_cpp"
+fi
+if [ "$CI_USE_GURUMDDS" = "false" ]; then
+  export CI_ARGS="$CI_ARGS rmw_gurumdds_cpp"
 fi
 if [ "$CI_USE_FASTRTPS_STATIC" = "false" ]; then
   export CI_ARGS="$CI_ARGS rmw_fastrtps_cpp"
@@ -315,6 +319,9 @@ if "!CI_CONNEXTDDS_RMW!" == "rmw_connext_cpp" (
 if "!CI_USE_CYCLONEDDS!" == "false" (
   set "CI_ARGS=!CI_ARGS! rmw_cyclonedds_cpp"
 )
+if "!CI_USE_GURUMDDS!" == "false" (
+  set "CI_ARGS=!CI_ARGS! rmw_gurumdds_cpp"
+)
 if "!CI_USE_FASTRTPS_STATIC!" == "false" (
   set "CI_ARGS=!CI_ARGS! rmw_fastrtps_cpp"
 )
@@ -417,6 +424,9 @@ if "!CI_CONNEXTDDS_RMW!" == "rmw_connext_cpp" (
 )
 if "!CI_USE_CYCLONEDDS!" == "false" (
   set "CI_ARGS=!CI_ARGS! rmw_cyclonedds_cpp"
+)
+if "!CI_USE_GURUMDDS!" == "false" (
+  set "CI_ARGS=!CI_ARGS! rmw_gurumdds_cpp"
 )
 if "!CI_USE_FASTRTPS_STATIC!" == "false" (
   set "CI_ARGS=!CI_ARGS! rmw_fastrtps_cpp"

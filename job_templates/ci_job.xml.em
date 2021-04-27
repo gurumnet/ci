@@ -92,6 +92,7 @@ branch: ${build.buildVariableResolver.resolve('CI_BRANCH_TO_TEST')}, <br/>
 use_connextdds: ${build.buildVariableResolver.resolve('CI_USE_CONNEXTDDS')}, <br/>
 use_connext_debs: ${build.buildVariableResolver.resolve('CI_USE_CONNEXT_DEBS')}, <br/>
 use_cyclonedds: ${build.buildVariableResolver.resolve('CI_USE_CYCLONEDDS')}, <br/>
+use_gurumdds: ${build.buildVariableResolver.resolve('CI_USE_GURUMDDS')}, <br/>
 use_fastrtps_static: ${build.buildVariableResolver.resolve('CI_USE_FASTRTPS_STATIC')}, <br/>
 use_fastrtps_dynamic: ${build.buildVariableResolver.resolve('CI_USE_FASTRTPS_DYNAMIC')}, <br/>
 use_opensplice: ${build.buildVariableResolver.resolve('CI_USE_OPENSPLICE')}, <br/>
@@ -131,7 +132,7 @@ fi
 if [ "$CI_USE_WHITESPACE_IN_PATHS" = "true" ]; then
   export CI_ARGS="$CI_ARGS --white-space-in sourcespace buildspace installspace workspace"
 fi
-export CI_ARGS="$CI_ARGS --ignore-rmw rmw_connext_dynamic_cpp"
+export CI_ARGS="$CI_ARGS --ignore-rmw"
 # TODO(asorbini) `rmw_connext_cpp` is still the default for dashing and foxy.
 if [ -n "$CI_ROS_DISTRO" -a \( "$CI_ROS_DISTRO" = dashing -o "$CI_ROS_DISTRO" = foxy \) ]; then
   if [ "$CI_USE_CONNEXTDDS" = "false" ]; then
@@ -146,6 +147,9 @@ else
 fi
 if [ "$CI_USE_CYCLONEDDS" = "false" ]; then
   export CI_ARGS="$CI_ARGS rmw_cyclonedds_cpp"
+fi
+if [ "$CI_USE_GURUMDDS" = "false" ]; then
+  export CI_ARGS="$CI_ARGS rmw_gurumdds_cpp"
 fi
 if [ "$CI_USE_FASTRTPS_STATIC" = "false" ]; then
   export CI_ARGS="$CI_ARGS rmw_fastrtps_cpp"
@@ -302,6 +306,9 @@ if "!CI_CONNEXTDDS_RMW!" == "rmw_connext_cpp" (
 if "!CI_USE_CYCLONEDDS!" == "false" (
   set "CI_ARGS=!CI_ARGS! rmw_cyclonedds_cpp"
 )
+if "!CI_USE_GURUMDDS!" == "false" (
+  set "CI_ARGS=!CI_ARGS! rmw_gurumdds_cpp"
+)
 if "!CI_USE_FASTRTPS_STATIC!" == "false" (
   set "CI_ARGS=!CI_ARGS! rmw_fastrtps_cpp"
 )
@@ -414,6 +421,9 @@ if "!CI_CONNEXTDDS_RMW!" == "rmw_connext_cpp" (
 )
 if "!CI_USE_CYCLONEDDS!" == "false" (
   set "CI_ARGS=!CI_ARGS! rmw_cyclonedds_cpp"
+)
+if "!CI_USE_GURUMDDS!" == "false" (
+  set "CI_ARGS=!CI_ARGS! rmw_gurumdds_cpp"
 )
 if "!CI_USE_FASTRTPS_STATIC!" == "false" (
   set "CI_ARGS=!CI_ARGS! rmw_fastrtps_cpp"

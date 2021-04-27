@@ -38,7 +38,7 @@ try:
 except ImportError:
     sys.exit("Could not import symbol from ros_buildfarm, please update ros_buildfarm.")
 
-DEFAULT_REPOS_URL = 'https://raw.githubusercontent.com/ros2/ros2/master/ros2.repos'
+DEFAULT_REPOS_URL = 'https://raw.githubusercontent.com/gurumnet/ros2/master/ros2.repos'
 DEFAULT_MAIL_RECIPIENTS = 'ros2-buildfarm@googlegroups.com'
 PERIODIC_JOB_SPEC = '30 7 * * *'
 
@@ -64,7 +64,7 @@ def main(argv=None):
         '--jenkins-url', '-u', default='https://ci.ros2.org',
         help="Url of the jenkins server to which the job should be added")
     parser.add_argument(
-        '--ci-scripts-repository', default='git@github.com:ros2/ci.git',
+        '--ci-scripts-repository', default='git@github.com:gurumnet/ci.git',
         help="repository from which ci scripts should be cloned"
     )
     parser.add_argument(
@@ -95,21 +95,18 @@ def main(argv=None):
         'supplemental_repos_url': '',
         'time_trigger_spec': '',
         'mailer_recipients': '',
-        'ignore_rmw_default': {
-            'rmw_connext_dynamic_cpp',
-            'rmw_fastrtps_dynamic_cpp',
-            'rmw_opensplice_cpp'},
+        'ignore_rmw_default': 'rmw_gurumdds_cpp',
         'use_connext_debs_default': 'false',
         'use_isolated_default': 'true',
         'colcon_mixin_url': 'https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml',
-        'build_args_default': '--event-handlers console_cohesion+ console_package_list+ --cmake-args -DINSTALL_EXAMPLES=OFF -DSECURITY=ON',
-        'test_args_default': '--event-handlers console_direct+ --executor sequential --retest-until-pass 2 --ctest-args -LE xfail --pytest-args -m "not xfail"',
+        'build_args_default': '--event-handlers console_cohesion+ console_package_list+ --cmake-args -DINSTALL_EXAMPLES=OFF -DSECURITY=ON --packages-up-to-regex tracetools tracetools_test rcl rclcpp',
+        'test_args_default': '--event-handlers console_direct+ --executor sequential --retest-until-pass 2 --ctest-args -LE xfail --pytest-args -m "not xfail" --packages-select-regex tracetools tracetools_test rcl rclcpp',
         'compile_with_clang_default': 'false',
         'enable_coverage_default': 'false',
         'dont_notify_every_unstable_build': 'false',
         'build_timeout_mins': 0,
-        'ubuntu_distro': 'focal',
-        'ros_distro': 'rolling',
+        'ubuntu_distro': 'bionic',
+        'ros_distro': 'dashing',
     }
 
     jenkins = connect(args.jenkins_url)
@@ -119,55 +116,55 @@ def main(argv=None):
             'label_expression': 'linux',
             'shell_type': 'Shell',
         },
-        'osx': {
-            'label_expression': 'macos',
-            'shell_type': 'Shell',
-            # the current OS X agent can't handle  git@github urls
-            'ci_scripts_repository': args.ci_scripts_repository.replace(
-                'git@github.com:', 'https://github.com/'),
-        },
-        'windows-metal': {
-            'label_expression': 'windows',
-            'shell_type': 'BatchFile',
-            'use_isolated_default': 'false',
-        },
-        'windows': {
-            'label_expression': 'windows-container',
-            'shell_type': 'BatchFile',
-            'use_isolated_default': 'false',
-        },
-        'linux-aarch64': {
-            'label_expression': 'linux_aarch64',
-            'shell_type': 'Shell',
-            'ignore_rmw_default': data['ignore_rmw_default'] | {'rmw_connext_cpp', 'rmw_connext_dynamic_cpp', 'rmw_connextdds'},
-        },
-        'linux-armhf': {
-            'label_expression': 'linux_armhf',
-            'shell_type': 'Shell',
-            'ignore_rmw_default': data['ignore_rmw_default'] | {'rmw_connext_cpp', 'rmw_connext_dynamic_cpp', 'rmw_connextdds'},
-            'build_args_default': data['build_args_default'].replace(
-                '--cmake-args', '--cmake-args -DCMAKE_CXX_FLAGS=-Wno-psabi -DCMAKE_C_FLAGS=-Wno-psabi -DDISABLE_SANITIZERS=ON'),
-        },
-        'linux-rhel': {
-            'label_expression': 'linux',
-            'shell_type': 'Shell',
-            'build_args_default': '--packages-skip-by-dep ros1_bridge --packages-skip ros1_bridge ' + data['build_args_default'],
-            'test_args_default': '--packages-skip-by-dep ros1_bridge --packages-skip ros1_bridge ' + data['test_args_default'],
-        },
+        # 'osx': {
+        #     'label_expression': 'macos',
+        #     'shell_type': 'Shell',
+        #     # the current OS X agent can't handle  git@github urls
+        #     'ci_scripts_repository': args.ci_scripts_repository.replace(
+        #         'git@github.com:', 'https://github.com/'),
+        # },
+        # 'windows-metal': {
+        #     'label_expression': 'windows',
+        #     'shell_type': 'BatchFile',
+        #     'use_isolated_default': 'false',
+        # },
+        # 'windows': {
+        #     'label_expression': 'windows-container',
+        #     'shell_type': 'BatchFile',
+        #     'use_isolated_default': 'false',
+        # },
+        # 'linux-aarch64': {
+        #     'label_expression': 'linux_aarch64',
+        #     'shell_type': 'Shell',
+        #     'ignore_rmw_default': data['ignore_rmw_default'] | {'rmw_connext_cpp', 'rmw_connext_dynamic_cpp', 'rmw_connextdds'},
+        # },
+        # 'linux-armhf': {
+        #     'label_expression': 'linux_armhf',
+        #     'shell_type': 'Shell',
+        #     'ignore_rmw_default': data['ignore_rmw_default'] | {'rmw_connext_cpp', 'rmw_connext_dynamic_cpp', 'rmw_connextdds'},
+        #     'build_args_default': data['build_args_default'].replace(
+        #         '--cmake-args', '--cmake-args -DCMAKE_CXX_FLAGS=-Wno-psabi -DCMAKE_C_FLAGS=-Wno-psabi -DDISABLE_SANITIZERS=ON'),
+        # },
+        # 'linux-rhel': {
+        #     'label_expression': 'linux',
+        #     'shell_type': 'Shell',
+        #     'build_args_default': '--packages-skip-by-dep ros1_bridge --packages-skip ros1_bridge ' + data['build_args_default'],
+        #     'test_args_default': '--packages-skip-by-dep ros1_bridge --packages-skip ros1_bridge ' + data['test_args_default'],
+        # },
     }
 
     os_config_overrides = {
-        'linux-rhel': {
-            'mixed_overlay_pkgs': '',
-            'ignore_rmw_default': data['ignore_rmw_default'] | {'rmw_connext_cpp', 'rmw_connextdds'},
-            'use_connext_debs_default': 'false',
-        },
+        # 'linux-rhel': {
+        #     'mixed_overlay_pkgs': '',
+        #     'ignore_rmw_default': data['ignore_rmw_default'] | {'rmw_connext_cpp', 'rmw_connextdds'},
+        #     'use_connext_debs_default': 'false',
+        # },
     }
 
     launcher_exclude = {
-        'linux-armhf',
-        'linux-rhel',
-        'windows-metal',
+        # 'linux-armhf',
+        # 'linux-rhel',
+        # 'windows-metal',
     }
 
     jenkins_kwargs = {}
@@ -212,66 +209,66 @@ def main(argv=None):
             continue
 
         packaging_label_expression = os_configs[os_name]['label_expression']
-        if os_name == 'osx':
-            packaging_label_expression = 'macos &amp;&amp; mojave'
+        # if os_name == 'osx':
+        #     packaging_label_expression = 'macos &amp;&amp; mojave'
 
         # configure a manual version of the packaging job
-        ignore_rmw_default_packaging = {'rmw_opensplice_cpp'}
-        if os_name in ['linux-aarch64', 'linux-armhf']:
-            ignore_rmw_default_packaging |= {'rmw_connext_cpp', 'rmw_connext_dynamic_cpp', 'rmw_connextdds'}
-        create_job(os_name, 'ci_packaging_' + os_name, 'packaging_job.xml.em', {
-            'build_discard': {
-                'days_to_keep': 180,
-                'num_to_keep': 100,
-            },
-            'cmake_build_type': 'RelWithDebInfo',
-            'label_expression': packaging_label_expression,
-            'mixed_overlay_pkgs': 'ros1_bridge',
-            'ignore_rmw_default': ignore_rmw_default_packaging,
-            'use_connext_debs_default': 'true',
-        })
+        ignore_rmw_default_packaging = {'rmw_gurumdds_cpp'}
+        # if os_name in ['linux-aarch64', 'linux-armhf']:
+        #     ignore_rmw_default_packaging |= {'rmw_connext_cpp', 'rmw_connext_dynamic_cpp', 'rmw_connextdds'}
+        # create_job(os_name, 'ci_packaging_' + os_name, 'packaging_job.xml.em', {
+        #     'build_discard': {
+        #         'days_to_keep': 180,
+        #         'num_to_keep': 100,
+        #     },
+        #     'cmake_build_type': 'RelWithDebInfo',
+        #     'label_expression': packaging_label_expression,
+        #     'mixed_overlay_pkgs': 'ros1_bridge',
+        #     'ignore_rmw_default': ignore_rmw_default_packaging,
+        #     'use_connext_debs_default': 'true',
+        # })
 
         # configure packaging job
-        create_job(os_name, 'packaging_' + os_name, 'packaging_job.xml.em', {
-            'build_discard': {
-                'days_to_keep': 370,
-                'num_to_keep': 370,
-            },
-            'cmake_build_type': 'RelWithDebInfo',
-            'disabled': os_name == 'linux-armhf',
-            'label_expression': packaging_label_expression,
-            'mixed_overlay_pkgs': 'ros1_bridge',
-            'time_trigger_spec': PERIODIC_JOB_SPEC,
-            'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
-            'ignore_rmw_default': ignore_rmw_default_packaging,
-            'use_connext_debs_default': 'true',
-        })
+        # create_job(os_name, 'packaging_' + os_name, 'packaging_job.xml.em', {
+        #     'build_discard': {
+        #         'days_to_keep': 370,
+        #         'num_to_keep': 370,
+        #     },
+        #     'cmake_build_type': 'RelWithDebInfo',
+        #     'disabled': os_name == 'linux-armhf',
+        #     'label_expression': packaging_label_expression,
+        #     'mixed_overlay_pkgs': 'ros1_bridge',
+        #     'time_trigger_spec': PERIODIC_JOB_SPEC,
+        #     'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
+        #     'ignore_rmw_default': ignore_rmw_default_packaging,
+        #     'use_connext_debs_default': 'true',
+        # })
 
         # create a nightly Debug packaging job on Windows
-        if os_name == 'windows':
-            create_job(os_name, 'packaging_' + os_name + '_debug', 'packaging_job.xml.em', {
-                'build_discard': {
-                    'days_to_keep': 370,
-                    'num_to_keep': 370,
-                    },
-                'cmake_build_type': 'Debug',
-                'mixed_overlay_pkgs': 'ros1_bridge',
-                'time_trigger_spec': PERIODIC_JOB_SPEC,
-                'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
-                'ignore_rmw_default': ignore_rmw_default_packaging,
-                'use_connext_debs_default': 'true',
-            })
+        # if os_name == 'windows':
+        #     create_job(os_name, 'packaging_' + os_name + '_debug', 'packaging_job.xml.em', {
+        #         'build_discard': {
+        #             'days_to_keep': 370,
+        #             'num_to_keep': 370,
+        #             },
+        #         'cmake_build_type': 'Debug',
+        #         'mixed_overlay_pkgs': 'ros1_bridge',
+        #         'time_trigger_spec': PERIODIC_JOB_SPEC,
+        #         'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
+        #         'ignore_rmw_default': ignore_rmw_default_packaging,
+        #         'use_connext_debs_default': 'true',
+        #     })
 
-        # configure nightly triggered job
-        if os_name != 'linux-armhf':
-            job_name = 'nightly_' + job_os_name + '_debug'
-            if os_name == 'windows':
-                job_name = job_name[:15]
-            create_job(os_name, job_name, 'ci_job.xml.em', {
-                'cmake_build_type': 'Debug',
-                'time_trigger_spec': PERIODIC_JOB_SPEC,
-                'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
-            })
+        # # configure nightly triggered job
+        # if os_name != 'linux-armhf':
+        #     job_name = 'nightly_' + job_os_name + '_debug'
+        #     if os_name == 'windows':
+        #         job_name = job_name[:15]
+        #     create_job(os_name, job_name, 'ci_job.xml.em', {
+        #         'cmake_build_type': 'Debug',
+        #         'time_trigger_spec': PERIODIC_JOB_SPEC,
+        #         'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
+        #     })
 
         # configure nightly job for testing with address sanitizer on linux
         if os_name == 'linux':
@@ -368,6 +365,7 @@ def main(argv=None):
             'rmw_dds_common',
             'rmw_fastrtps_cpp',
             'rmw_fastrtps_shared_cpp',
+            'rmw_gurumdds_cpp',
             'rmw_implementation',
             'rosgraph_msgs',
             'rosidl_default_runtime',
@@ -377,6 +375,7 @@ def main(argv=None):
             'rosidl_typesupport_cpp',
             'rosidl_typesupport_fastrtps_c',
             'rosidl_typesupport_fastrtps_cpp',
+            'rosidl_typesupport_gurumdds',
             'rosidl_typesupport_interface',
             'spdlog_vendor',
             'statistics_msgs',
@@ -497,47 +496,47 @@ def main(argv=None):
             })
 
         # configure nightly triggered job
-        if os_name != 'linux-armhf':
-            job_name = 'nightly_' + job_os_name + '_release'
-            if os_name == 'windows':
-                job_name = job_name[:15]
-            create_job(os_name, job_name, 'ci_job.xml.em', {
-                'cmake_build_type': 'Release',
-                'time_trigger_spec': PERIODIC_JOB_SPEC,
-                'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
-            })
+        # if os_name != 'linux-armhf':
+        #     job_name = 'nightly_' + job_os_name + '_release'
+        #     if os_name == 'windows':
+        #         job_name = job_name[:15]
+        #     create_job(os_name, job_name, 'ci_job.xml.em', {
+        #         'cmake_build_type': 'Release',
+        #         'time_trigger_spec': PERIODIC_JOB_SPEC,
+        #         'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
+        #     })
 
-        # configure nightly triggered job with repeated testing
-        if os_name != 'linux-armhf':
-            job_name = 'nightly_' + job_os_name + '_repeated'
-            if os_name == 'windows':
-                job_name = job_name[:15]
-            test_args_default = os_configs.get(os_name, data).get('test_args_default', data['test_args_default'])
-            test_args_default = test_args_default.replace('--retest-until-pass', '--retest-until-fail')
-            test_args_default = test_args_default.replace('--ctest-args -LE xfail', '--ctest-args -LE "(linter|xfail)"')
-            test_args_default = test_args_default.replace('--pytest-args -m "not xfail"', '--pytest-args -m "not linter and not xfail"')
-            if job_os_name == 'linux-aarch64':
-                # skipping known to be flaky tests https://github.com/ros2/rviz/issues/368
-                test_args_default += ' --packages-skip rviz_common rviz_default_plugins rviz_rendering rviz_rendering_tests'
-            create_job(os_name, job_name, 'ci_job.xml.em', {
-                'cmake_build_type': 'None',
-                'time_trigger_spec': PERIODIC_JOB_SPEC,
-                'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
-                'test_args_default': test_args_default,
-            })
+        # # configure nightly triggered job with repeated testing
+        # if os_name != 'linux-armhf':
+        #     job_name = 'nightly_' + job_os_name + '_repeated'
+        #     if os_name == 'windows':
+        #         job_name = job_name[:15]
+        #     test_args_default = os_configs.get(os_name, data).get('test_args_default', data['test_args_default'])
+        #     test_args_default = test_args_default.replace('--retest-until-pass', '--retest-until-fail')
+        #     test_args_default = test_args_default.replace('--ctest-args -LE xfail', '--ctest-args -LE "(linter|xfail)"')
+        #     test_args_default = test_args_default.replace('--pytest-args -m "not xfail"', '--pytest-args -m "not linter and not xfail"')
+        #     if job_os_name == 'linux-aarch64':
+        #         # skipping known to be flaky tests https://github.com/ros2/rviz/issues/368
+        #         test_args_default += ' --packages-skip rviz_common rviz_default_plugins rviz_rendering rviz_rendering_tests'
+        #     create_job(os_name, job_name, 'ci_job.xml.em', {
+        #         'cmake_build_type': 'None',
+        #         'time_trigger_spec': PERIODIC_JOB_SPEC,
+        #         'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
+        #         'test_args_default': test_args_default,
+        #     })
 
-        # configure nightly triggered job for excluded test
-        if os_name != 'linux-armhf':
-            job_name = 'nightly_' + job_os_name + '_xfail'
-            test_args_default = os_configs.get(os_name, data).get('test_args_default', data['test_args_default'])
-            test_args_default = test_args_default.replace('--ctest-args -LE xfail', '--ctest-args -L xfail')
-            test_args_default = test_args_default.replace('--pytest-args -m "not xfail"', '--pytest-args -m xfail --runxfail')
-            create_job(os_name, job_name, 'ci_job.xml.em', {
-                'cmake_build_type': 'None',
-                'time_trigger_spec': PERIODIC_JOB_SPEC,
-                'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
-                'test_args_default': test_args_default,
-            })
+        # # configure nightly triggered job for excluded test
+        # if os_name != 'linux-armhf':
+        #     job_name = 'nightly_' + job_os_name + '_xfail'
+        #     test_args_default = os_configs.get(os_name, data).get('test_args_default', data['test_args_default'])
+        #     test_args_default = test_args_default.replace('--ctest-args -LE xfail', '--ctest-args -L xfail')
+        #     test_args_default = test_args_default.replace('--pytest-args -m "not xfail"', '--pytest-args -m xfail --runxfail')
+        #     create_job(os_name, job_name, 'ci_job.xml.em', {
+        #         'cmake_build_type': 'None',
+        #         'time_trigger_spec': PERIODIC_JOB_SPEC,
+        #         'mailer_recipients': DEFAULT_MAIL_RECIPIENTS,
+        #         'test_args_default': test_args_default,
+        #     })
 
     # configure the launch job
     launcher_job_name = 'ci_launcher'
