@@ -715,6 +715,8 @@ def run(args, build_function, blacklisted_package_names=None):
                 'gurumdds',
                 'gurumdds_cmake_module',
                 'rmw_gurumdds_cpp',
+                'rmw_gurumdds_shared_cpp',
+                'rmw_gurumdds_static_cpp',
             ]
         if 'rmw_fastrtps_cpp' in args.ignore_rmw:
             blacklisted_package_names += [
